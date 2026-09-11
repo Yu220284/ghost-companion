@@ -1,43 +1,50 @@
-import type { Metadata, Viewport } from "next";
+import type { Metadata } from "next";
 import { AppProviders } from "@/components/providers";
+import { siteUrl } from "@/lib/site-url";
 import "./globals.css";
 
-const title = "Ghost Companion — ふわっと、そばに。";
+const title = "Ghost Companion — Petassist desk + Obake";
 const description =
-  "100bas dialogue companion for the cute floating ghost. Chat and watch-over only — robot control is a separate app.";
+  "Petassist desk and TrueForge agent harness, with Obake（お化けちゃん）on the party dock.";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl()),
   title: {
     default: title,
     template: "%s — Ghost Companion",
   },
   description,
-  keywords: ["100bas", "ghost", "companion", "dialogue", "お化け"],
-  authors: [{ name: "100bas" }],
+  keywords: [
+    "Ghost Companion",
+    "Obake",
+    "Petassist",
+    "stickable AI agents",
+    "TrueForge",
+    "desk",
+  ],
+  authors: [{ name: "Ghost Companion" }],
   icons: {
-    icon: "/ghost/normal.png",
-    shortcut: "/ghost/normal.png",
-    apple: "/ghost/normal.png",
+    icon: "/ghost/ObakeNormal.webp",
+    shortcut: "/ghost/ObakeNormal.webp",
+    apple: "/ghost/ObakeNormal.webp",
   },
   openGraph: {
     type: "website",
-    locale: "ja_JP",
-    alternateLocale: ["en_US"],
+    locale: "en_US",
+    alternateLocale: ["ja_JP"],
     title,
     description,
     siteName: "Ghost Companion",
   },
-  robots: {
-    index: false,
-    follow: false,
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
   },
-};
-
-export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1,
-  viewportFit: "cover",
-  themeColor: "#050812",
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
@@ -46,7 +53,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ja" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <body className="font-sans antialiased" suppressHydrationWarning>
         <AppProviders>{children}</AppProviders>
       </body>

@@ -31,14 +31,9 @@ html {
 }
 
 body {
-  background: #050812;
-  color: #f5f0e6;
+  background: #eef3f9;
+  color: hsl(var(--foreground));
   min-height: 100vh;
-  min-height: 100dvh;
-}
-
-.ghost-app {
-  min-height: 100dvh;
 }
 
 html.pet-overlay,

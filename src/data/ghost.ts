@@ -4,8 +4,6 @@ export type GhostCompanion = {
   id: "ghost";
   name: "Ghost";
   nameJa: "お化け";
-  tagline: "ふわっと、そばに。";
-  taglineEn: "Floating, softly, by your side.";
   accent: string;
   status: GhostStatus;
 };
@@ -14,26 +12,20 @@ export const GHOST: GhostCompanion = {
   id: "ghost",
   name: "Ghost",
   nameJa: "お化け",
-  tagline: "ふわっと、そばに。",
-  taglineEn: "Floating, softly, by your side.",
-  accent: "#c6a661",
+  accent: "#e56b8c",
   status: "idle",
 };
 
-export const GHOST_BUBBLES: Record<GhostStatus, string[]> = {
-  idle: [
-    "今日もそばにいるよ。",
-    "ふわふわ……。",
-    "なにかあったら話しかけてね。",
-  ],
-  talking: [
-    "うんうん。",
-    "聞いてるよ。",
-    "もうすこし教えて？",
-  ],
-  failed: [
-    "うまくできなかった……。",
-    "ごめんね。もういちど試そう。",
-    "ちょっと落ち込み中……。",
-  ],
+/** Primary care action only — mood quick-picks removed. */
+export type CareAction = {
+  id: "speak";
+  label: string;
+  primary: boolean;
+  prompt: string | null;
 };
+
+export const CARE_ACTIONS: CareAction[] = [
+  { id: "speak", label: "いまの調子を話す", primary: true, prompt: null },
+];
+
+export const DEFAULT_WAKE_WORDS = ["おばけちゃん"];

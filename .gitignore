@@ -46,3 +46,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+public/ghost/_uncropped/
+
+# unused raster duplicates (webp used)
+public/party/**/*.png
