@@ -24,9 +24,9 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Ghost Companion" }],
   icons: {
-    icon: "/ghost/ObakeNormal.webp",
-    shortcut: "/ghost/ObakeNormal.webp",
-    apple: "/ghost/ObakeNormal.webp",
+    icon: "/brand/logo.webp",
+    shortcut: "/brand/logo.webp",
+    apple: "/brand/logo.webp",
   },
   openGraph: {
     type: "website",

@@ -1,5 +1,6 @@
 "use client";
 
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { GITHUB_REPO } from "@/lib/site-url";
 import { useI18n } from "@/lib/i18n/locale";
 import { cn } from "@/lib/utils";
@@ -16,8 +17,8 @@ export function SiteFooter({ className }: { className?: string }) {
     >
       <div className="mx-auto flex max-w-5xl flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="font-semibold text-white">{t.brand.title}</p>
-          <p className="mt-1 max-w-md text-xs leading-relaxed">
+          <BrandLogo height={28} className="brightness-0 invert" />
+          <p className="mt-2 max-w-md text-xs leading-relaxed">
             {t.site.footer.tagline}
           </p>
           <p className="mt-2 text-[11px]">{t.site.footer.credit}</p>

@@ -447,8 +447,26 @@ html.pet-overlay [data-nextjs-dev-indicator] {
 html.pet-paused .pet-bob,
 html.pet-paused .pet-hover-dot,
 html.pet-paused .animate-ping,
-html.pet-paused .animate-pulse {
+html.pet-paused .animate-pulse,
+html.pet-paused .ghost-float {
   animation-play-state: paused;
+}
+
+.ghost-float {
+  animation: ghost-float-bob var(--ghost-float-dur, 4.2s) ease-in-out infinite;
+  will-change: transform;
+}
+.ghost-float-paused {
+  animation-play-state: paused;
+}
+@keyframes ghost-float-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(calc(var(--ghost-float-amp, 6px) * -1));
+  }
 }
 
 @keyframes pet-hop {

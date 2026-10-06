@@ -1,4 +1,4 @@
-import { GhostDeskApp } from "@/components/ghost/GhostDeskApp";
+import { GhostDeskConsole } from "@/components/ghost/GhostDeskConsole";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function DeskPage() {
-  return <GhostDeskApp />;
+  return <GhostDeskConsole />;
 }

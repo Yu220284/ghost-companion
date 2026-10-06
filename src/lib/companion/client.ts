@@ -11,6 +11,7 @@ import {
 } from "@/lib/companion/protocol";
 
 const PRESENCE_CHANNEL = "petassist-companion";
+const OPEN_PAIR_CHANNEL = "petassist-open-pair";
 
 export type CompanionPresence = {
   paired: boolean;
@@ -46,6 +47,30 @@ export function subscribePresence(cb: (next: CompanionPresence) => void) {
 
 export function publishPresence(next: CompanionPresence) {
   postPresence(next);
+}
+
+/** Sticky menu → hidden /desk window: open the QR pair sheet. */
+export function requestOpenPairSheet() {
+  try {
+    const ch = new BroadcastChannel(OPEN_PAIR_CHANNEL);
+    ch.postMessage({ type: "open" });
+    ch.close();
+  } catch {
+    /* ignore */
+  }
+}
+
+export function subscribeOpenPairSheet(cb: () => void) {
+  let ch: BroadcastChannel | null = null;
+  try {
+    ch = new BroadcastChannel(OPEN_PAIR_CHANNEL);
+    ch.onmessage = () => cb();
+  } catch {
+    /* ignore */
+  }
+  return () => {
+    ch?.close();
+  };
 }
 
 function jsonHeaders(token?: string | null): HeadersInit {
@@ -164,6 +189,7 @@ export async function postLeap(input: {
   durationMs?: number;
   overlapAt?: number;
   t0?: number;
+  seed?: Array<{ from: "pc" | "phone" | "pet"; text: string }>;
 }) {
   const res = await fetch("/api/companion/leap", {
     method: "POST",
@@ -175,6 +201,7 @@ export async function postLeap(input: {
       durationMs: input.durationMs ?? LEAP_DURATION_MS,
       overlapAt: input.overlapAt ?? LEAP_OVERLAP_AT_MS,
       t0: input.t0 ?? Date.now(),
+      seed: input.seed,
     }),
   });
   return res.ok;

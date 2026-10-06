@@ -43,7 +43,10 @@ type CompanionContextValue = {
   setSheetOpen: (open: boolean) => void;
   openPairSheet: () => Promise<void>;
   disconnect: () => Promise<void>;
-  leapToPhone: (id: string) => Promise<void>;
+  leapToPhone: (
+    id: string,
+    seed?: Array<{ from: "pc" | "phone" | "pet"; text: string }>
+  ) => Promise<void>;
 };
 
 const CompanionContext = createContext<CompanionContextValue | null>(null);
@@ -267,12 +270,18 @@ export function CompanionProvider({
     publishPresence({ paired: false, locations: {} });
   }, []);
 
-  const leapToPhone = useCallback(async (id: string) => {
-    const t0 = Date.now();
-    onLeapRef.current?.(id, "phone");
-    void window.petassist?.leapPet(id, "out");
-    await postLeap({ id, from: "pc", to: "phone", t0 });
-  }, []);
+  const leapToPhone = useCallback(
+    async (
+      id: string,
+      seed?: Array<{ from: "pc" | "phone" | "pet"; text: string }>
+    ) => {
+      const t0 = Date.now();
+      onLeapRef.current?.(id, "phone");
+      void window.petassist?.leapPet(id, "out");
+      await postLeap({ id, from: "pc", to: "phone", t0, seed });
+    },
+    []
+  );
 
   const value = useMemo(
     () => ({

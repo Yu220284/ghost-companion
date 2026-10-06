@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import type { CSSProperties } from "react";
 import {
   spriteForGhostLook,
   type MoveDir,
@@ -19,6 +19,11 @@ type GhostSpriteProps = {
   sizeClassName?: string;
   floatAmp?: number;
   floatSpeed?: number;
+  /** Pause CSS bob (e.g. while dragging). */
+  paused?: boolean;
+  /** Optional CSS drift (non-sticky wander). */
+  shiftX?: number;
+  shiftY?: number;
 };
 
 export function GhostSprite({
@@ -31,6 +36,9 @@ export function GhostSprite({
   sizeClassName = "h-full w-auto max-w-full",
   floatAmp = 6,
   floatSpeed = 4.2,
+  paused = false,
+  shiftX = 0,
+  shiftY = 0,
 }: GhostSpriteProps) {
   const src = spriteForGhostLook({
     status,
@@ -41,19 +49,22 @@ export function GhostSprite({
   });
 
   return (
-    <motion.img
-      key={src}
+    <img
       src={src}
       alt=""
       draggable={false}
-      animate={{ y: [0, -floatAmp, 0] }}
-      transition={{
-        duration: floatSpeed,
-        repeat: Infinity,
-        ease: "easeInOut",
-      }}
+      style={
+        {
+          "--ghost-float-amp": `${floatAmp}px`,
+          "--ghost-float-dur": `${floatSpeed}s`,
+          ...(shiftX || shiftY
+            ? { translate: `${shiftX}px ${shiftY}px` }
+            : null),
+        } as CSSProperties
+      }
       className={cn(
-        "pointer-events-none object-contain select-none",
+        "pointer-events-none object-contain select-none ghost-float",
+        paused && "ghost-float-paused",
         sizeClassName,
         className
       )}

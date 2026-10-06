@@ -1,5 +1,6 @@
 "use client";
 
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { LocaleToggle } from "@/components/i18n/LocaleToggle";
 import { useI18n } from "@/lib/i18n/locale";
 import { cn } from "@/lib/utils";
@@ -33,13 +34,13 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-[#302c55]/10 bg-[#eef3f9]/92 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center gap-2 px-4 py-3 sm:gap-3">
-        <Link href="/" className="min-w-0 shrink-0" onClick={() => setOpen(false)}>
-          <p className="whitespace-nowrap text-[10px] font-semibold tracking-[0.18em] text-[#e56b8c]">
-            {t.brand.kicker}
-          </p>
-          <p className="whitespace-nowrap text-base font-bold leading-tight text-[#302c55]">
-            {t.brand.title}
-          </p>
+        <Link
+          href="/"
+          className="min-w-0 shrink-0"
+          onClick={() => setOpen(false)}
+          aria-label={t.brand.title}
+        >
+          <BrandLogo height={32} priority />
         </Link>
 
         <nav className="ml-2 hidden min-w-0 items-center lg:ml-4 lg:flex">

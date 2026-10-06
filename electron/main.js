@@ -113,17 +113,16 @@ const TOP_SNAP_PX = 56;
 const PARTY_ORDER = ["ghost"];
 const STICKY_SIZES = {
   compact: { width: STICKY_W, height: STICKY_H },
-  chat: { width: 320, height: 420 },
+  chat: { width: 360, height: 500 },
   alert: { width: 320, height: 360 },
   choice: { width: 320, height: 340 },
-  menu: { width: 260, height: 520 },
+  menu: { width: 300, height: 560 },
   settings: { width: 300, height: 540 },
 };
-const STICKY_GROW = new Set(["alert", "choice", "chat", "settings"]);
 const STICKY_GROW_UP = new Set(["alert", "choice", "chat"]);
 const PET_TOP_COMPACT = 4;
-const PET_SLOT_H = 200;
-const PET_BOTTOM_PAD = 8;
+const PET_SLOT_H = 120;
+const PET_BOTTOM_PAD = 6;
 
 function petTopInWindow(mode, height) {
   if (STICKY_GROW_UP.has(mode)) return height - PET_BOTTOM_PAD - PET_SLOT_H;
@@ -229,6 +228,11 @@ function stickyWebPrefs() {
   };
 }
 
+function asInt(n, fallback = 0) {
+  const v = Math.round(Number(n));
+  return Number.isFinite(v) ? v : fallback;
+}
+
 function clampToDisplay(x, y, display, w = STICKY_W, h = STICKY_H) {
   const b = display.bounds;
   const sliver = 48;
@@ -275,11 +279,18 @@ function applyTrack() {
     return;
   }
   const p = cursorPoint();
-  track.win.setPosition(
-    Math.round(p.x - track.offset.x),
-    Math.round(p.y - track.offset.y),
-    false
-  );
+  const x = asInt(p?.x - track.offset.x);
+  const y = asInt(p?.y - track.offset.y);
+  if (!Number.isInteger(x) || !Number.isInteger(y)) return;
+  if (track.lastX === x && track.lastY === y) return;
+  try {
+    track.win.setPosition(x, y, false);
+    track.lastX = x;
+    track.lastY = y;
+  } catch (err) {
+    console.warn("[ghost-companion] applyTrack setPosition failed", { x, y }, err);
+    stopTrack();
+  }
 }
 
 function startTrack(win, offset, passClicks = false) {
@@ -292,8 +303,18 @@ function startTrack(win, offset, passClicks = false) {
       /* ignore */
     }
   }
-  track = { win, offset, passClicks };
+  track = {
+    win,
+    offset: {
+      x: Number(offset?.x) || 0,
+      y: Number(offset?.y) || 0,
+    },
+    passClicks,
+    lastX: null,
+    lastY: null,
+  };
   applyTrack();
+  // Main-process loop only — renderer dragMove must not also call setPosition.
   const tick = () => {
     applyTrack();
     if (track) trackTimer = setTimeout(tick, FRAME_MS);
@@ -681,15 +702,44 @@ ipcMain.on("pet:drag-begin", (event) => {
   if (!win || win.isDestroyed()) return;
   const p = cursorPoint();
   const b = win.getBounds();
-  startTrack(win, { x: p.x - b.x, y: p.y - b.y }, false);
+  startTrack(
+    win,
+    {
+      x: (Number(p?.x) || 0) - (Number(b?.x) || 0),
+      y: (Number(p?.y) || 0) - (Number(b?.y) || 0),
+    },
+    false
+  );
 });
 
 ipcMain.on("pet:drag-move", () => {
-  applyTrack();
+  // Tracking runs on the main timer from drag-begin; ignore move spam.
 });
 
 ipcMain.on("pet:drag-end", () => {
   stopTrack();
+});
+
+ipcMain.on("pet:nudge", (event, payload = {}) => {
+  if (track) return;
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (!win || win.isDestroyed()) return;
+  let stickyId = null;
+  for (const [id, sticky] of stickies) {
+    if (sticky === win) {
+      stickyId = id;
+      break;
+    }
+  }
+  if (stickyId && leaping.has(stickyId)) return;
+  const dx = Number(payload.dx) || 0;
+  const dy = Number(payload.dy) || 0;
+  if (!dx && !dy) return;
+  const [x, y] = win.getPosition();
+  const [w, h] = win.getSize();
+  const display = screen.getDisplayNearestPoint({ x, y });
+  const pos = clampToDisplay(x + dx, y + dy, display, w, h);
+  win.setPosition(pos.x, pos.y, false);
 });
 
 ipcMain.handle("pet:resize", (_event, { id, mode }) => {
@@ -699,17 +749,46 @@ ipcMain.handle("pet:resize", (_event, { id, mode }) => {
   if (!win || win.isDestroyed()) return;
   const next = STICKY_SIZES[mode] ? mode : "compact";
   const size = STICKY_SIZES[next];
-  const prev = stickyMode.get(win);
-  const grow = STICKY_GROW.has(next);
-  win.setResizable(grow);
-  if (grow) win.setMinimumSize(260, 240);
-  else win.setMinimumSize(STICKY_W, STICKY_H);
+  const prev = stickyMode.get(win) || "compact";
+
+  // Fixed modes only — free resize caused mismatched chat chrome.
+  // Do not lock max size: on macOS transparent panels, max==min breaks drag setPosition.
+  win.setResizable(false);
+  try {
+    win.setMinimumSize(1, 1);
+    if (typeof win.setMaximumSize === "function") {
+      win.setMaximumSize(0, 0);
+    }
+  } catch {
+    /* ignore */
+  }
+
   stickyMode.set(win, next);
-  const [x, y] = win.getPosition();
-  const [, h] = win.getSize();
-  const ny =
-    y + petTopInWindow(prev || "compact", h) - petTopInWindow(next, size.height);
-  win.setBounds({ x, y: ny, width: size.width, height: size.height });
+  const pos = win.getPosition();
+  const cur = win.getSize();
+  const x = asInt(pos?.[0]);
+  const y = asInt(pos?.[1]);
+  const h = asInt(cur?.[1], size.height);
+  const ny = asInt(
+    y + petTopInWindow(prev, h) - petTopInWindow(next, size.height),
+    y
+  );
+  const bounds = {
+    x,
+    y: Number.isFinite(ny) ? ny : y,
+    width: size.width,
+    height: size.height,
+  };
+  try {
+    win.setBounds(bounds);
+  } catch (err) {
+    console.warn("[ghost-companion] pet:resize setBounds failed", bounds, err);
+  }
+  try {
+    win.setMinimumSize(size.width, size.height);
+  } catch {
+    /* ignore */
+  }
 });
 
 ipcMain.handle("desk:notify", (_event, payload = {}) => {

@@ -6,6 +6,7 @@ import { TalkPanel } from "@/components/party/TalkPanel";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DockMenu } from "@/components/demo/DockMenu";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { PairSheet } from "@/components/companion/PairSheet";
 import { CompanionProvider, useCompanion } from "@/lib/hooks/use-companion";
 import { postCompanionMessage } from "@/lib/companion/client";
@@ -1442,10 +1443,7 @@ export function DemoConsole({ embedded = false }: { embedded?: boolean }) {
       <header className="relative z-40 flex items-center gap-2 rounded-2xl bg-white/90 px-3 py-3 shadow-sm backdrop-blur">
         <DockMenu />
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-semibold tracking-wide text-[hsl(var(--primary))]">
-            {t.brand.kicker}
-          </p>
-          <h1 className="text-lg font-bold text-[#302c55]">{t.brand.title}</h1>
+          <BrandLogo height={28} />
         </div>
         <Badge
           data-testid="harness-badge"

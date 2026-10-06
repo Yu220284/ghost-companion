@@ -18,6 +18,7 @@ contextBridge.exposeInMainWorld("petassist", {
   dragBegin: () => ipcRenderer.send("pet:drag-begin"),
   dragMove: () => ipcRenderer.send("pet:drag-move"),
   dragEnd: () => ipcRenderer.send("pet:drag-end"),
+  nudgeSticky: (dx, dy) => ipcRenderer.send("pet:nudge", { dx, dy }),
   followCursor: (id) => ipcRenderer.send("pet:follow-cursor", { id }),
   openDirectory: () => ipcRenderer.invoke("dialog:openDirectory"),
   notify: (opts) => ipcRenderer.invoke("desk:notify", opts),

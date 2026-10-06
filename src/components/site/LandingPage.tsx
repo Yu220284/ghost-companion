@@ -1,6 +1,7 @@
 "use client";
 
 import { DemoConsole } from "@/components/demo/DemoConsole";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteSearch } from "@/components/site/SiteSearch";
@@ -34,21 +35,12 @@ export function LandingPage() {
         <section className="site-hero relative overflow-hidden px-4 pb-16 pt-12 sm:pt-16">
           <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[0.9fr_1.1fr]">
             <div>
-              <motion.p
-                className="site-eyebrow"
+              <motion.div
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
               >
-                {t.site.hero.badge}
-              </motion.p>
-              <motion.h1
-                className="site-display mt-3"
-                initial={{ opacity: 0, y: 18 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.06 }}
-              >
-                {t.site.hero.title}
-              </motion.h1>
+                <BrandLogo height={52} priority className="max-w-full" />
+              </motion.div>
               <motion.p
                 className="mt-5 max-w-xl text-sm leading-[1.75] text-[#5a6478] sm:text-[0.95rem] sm:leading-[1.8]"
                 initial={{ opacity: 0, y: 18 }}
@@ -260,8 +252,8 @@ export function LandingPage() {
             </div>
           </div>
           <div className="site-closing-copy">
-            <p className="site-eyebrow !text-[#f4c4d0]">{t.brand.kicker}</p>
-            <h2 className="site-display-md !text-white">{t.site.closing.title}</h2>
+            <BrandLogo height={36} className="brightness-0 invert" />
+            <h2 className="site-display-md mt-4 !text-white">{t.site.closing.title}</h2>
             <p>{t.site.closing.lead}</p>
             <div className="mt-8 flex flex-wrap items-center gap-4">
               <Button asChild size="lg" className="site-cta site-cta-on-ink">

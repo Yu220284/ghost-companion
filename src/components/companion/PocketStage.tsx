@@ -11,6 +11,7 @@ import {
 import { useSearchParams } from "next/navigation";
 import { motion, useAnimationControls } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { spriteFor } from "@/data/looks";
 import type { PartyMember } from "@/data/party";
 import {
@@ -258,6 +259,7 @@ export function PocketStage() {
       setPets((prev) =>
         prev.map((p) => (p.id === id ? { ...p, phase: "idle" as const } : p))
       );
+      setComposingId(id);
       void postArrived({ id, location: "phone", token });
     },
     [token]
@@ -301,10 +303,7 @@ export function PocketStage() {
       };
       setThreads((prev) => mergeLine(prev, local));
       setDraft("");
-      const onStage = pets.some(
-        (p) => p.id === id && (p.phase === "idle" || p.phase === "in")
-      );
-      if (onStage) startExit(id);
+      // Keep the pet on stage — chat continues on the phone.
       const result = await postCompanionMessage({ id, text: trimmed, token });
       if (!result.ok) {
         if (result.error === "asleep") {
@@ -328,17 +327,15 @@ export function PocketStage() {
         );
       }
     },
-    [token, pets, startExit]
+    [token]
   );
 
   if (!token) {
     return (
       <main className="flex h-full flex-col justify-end px-6 pb-[max(2rem,env(safe-area-inset-bottom))] pt-[max(1.5rem,env(safe-area-inset-top))]">
         <div className="mb-auto">
-          <p className="text-xs font-semibold tracking-wide text-[hsl(var(--primary))]">
-            {t.brand.kicker}
-          </p>
-          <h1 className="mt-1 text-2xl font-bold text-[#302c55]">
+          <BrandLogo height={32} />
+          <h1 className="mt-3 text-2xl font-bold text-[#24365c]">
             {t.companion.title}
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-slate-500">
@@ -363,7 +360,7 @@ export function PocketStage() {
               onChange={(e) =>
                 setCode(e.target.value.replace(/\D/g, "").slice(0, 6))
               }
-              className="mt-2 block w-full rounded-2xl border border-slate-200 px-4 py-3 text-center font-mono text-2xl tracking-[0.4em] text-[#302c55] outline-none focus:border-[hsl(var(--primary))]"
+              className="mt-2 block w-full rounded-2xl border border-slate-200 px-4 py-3 text-center font-mono text-2xl tracking-[0.4em] text-[#24365c] outline-none focus:border-[hsl(var(--primary))]"
             />
           </label>
           {error ? (
@@ -393,7 +390,7 @@ export function PocketStage() {
   return (
     <main className="relative h-full overflow-hidden">
       <header className="absolute left-0 right-0 top-0 z-10 flex items-center justify-between px-4 pt-[max(0.75rem,env(safe-area-inset-top))]">
-        <p className="text-[11px] font-semibold text-[#302c55]">
+        <p className="text-[11px] font-semibold text-[#24365c]">
           {t.companion.connected}
         </p>
         <button
@@ -510,7 +507,7 @@ function PocketComposer({
     <section className="absolute bottom-0 left-0 right-0 z-20 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
       <div className="rounded-3xl bg-white/95 p-3 shadow-md backdrop-blur">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-[11px] font-semibold text-[#302c55]">{name}</p>
+          <p className="text-[11px] font-semibold text-[#24365c]">{name}</p>
           <p className="text-[10px] text-slate-400">
             {asleep ? t.companion.asleep : t.companion.trips(trips, MESSAGE_MAX_TRIPS)}
           </p>
@@ -546,17 +543,17 @@ function PocketComposer({
                   className={cn(
                     "max-w-[90%] text-[12px] leading-snug whitespace-pre-wrap break-words",
                     line.role === "user" &&
-                      "rounded-lg bg-slate-50 px-2 py-1 text-[#302c55]",
-                    line.role !== "user" && "font-medium text-[#302c55]"
+                      "rounded-lg bg-slate-50 px-2 py-1 text-[#24365c]",
+                    line.role !== "user" && "font-medium text-[#24365c]"
                   )}
                 >
                   {line.text}
                 </p>
               </div>
             ))
-          ) : (
+          ) : t.companion.threadEmpty ? (
             <p className="text-[12px] text-slate-400">{t.companion.threadEmpty}</p>
-          )}
+          ) : null}
           {thinking ? (
             <p className="text-[12px] font-medium text-slate-400">{t.companion.thinking}</p>
           ) : null}

@@ -359,8 +359,8 @@ export function postMessage(input: {
   const asleep = trips >= MESSAGE_MAX_TRIPS;
   if (pet && asleep) pet.asleep = true;
   const live = s.pets.get(input.petId);
-  const shouldLeap =
-    live?.location === "phone" && (input.from === "phone" || asleep);
+  // Stay on phone for ongoing chat. Only auto-return when the pet falls asleep.
+  const shouldLeap = Boolean(live?.location === "phone" && asleep);
   emit({
     type: "message",
     ...line,
@@ -372,6 +372,39 @@ export function postMessage(input: {
     emit(snapshotEvent());
   }
   return { ok: true, line, trips, asleep };
+}
+
+/** Replace / seed a pet thread (e.g. PC chat history when leaping to phone). */
+export function seedThread(
+  petId: string,
+  lines: Array<{ from: CompanionSpeaker; text: string }>
+): CompanionChatLine[] | null {
+  if (!knownId(petId)) return null;
+  const s = state();
+  const mapped: CompanionChatLine[] = [];
+  for (const row of lines) {
+    const text = String(row.text ?? "")
+      .trim()
+      .slice(0, MESSAGE_MAX_TEXT);
+    if (!text) continue;
+    const from =
+      row.from === "pc" || row.from === "phone" || row.from === "pet"
+        ? row.from
+        : null;
+    if (!from) continue;
+    mapped.push({
+      msgId: newMsgId(),
+      petId,
+      from,
+      text,
+      at: Date.now(),
+    });
+  }
+  if (!mapped.length) return s.threads.get(petId) ?? [];
+  const next = mapped.slice(-MESSAGE_MAX_THREAD);
+  s.threads.set(petId, next);
+  emit(snapshotEvent());
+  return next;
 }
 
 export function setParcel(input: {

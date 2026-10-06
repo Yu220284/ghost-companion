@@ -6,8 +6,8 @@ export const LEAP_OVERLAP_AT_MS = 700;
 export const LEAP_HOPS = 5;
 export const CODE_TTL_MS = 5 * 60 * 1000;
 export const MESSAGE_MAX_TEXT = 400;
-export const MESSAGE_MAX_THREAD = 40;
-export const MESSAGE_MAX_TRIPS = 5;
+export const MESSAGE_MAX_THREAD = 80;
+export const MESSAGE_MAX_TRIPS = 30;
 export const PARCEL_MAX_BYTES = 700_000;
 
 export type CompanionLocation = "pc" | "phone" | "transit";
